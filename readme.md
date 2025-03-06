@@ -51,6 +51,12 @@ Example assuming a virtual environment was created and you are calling it from t
     nohup .venv/bin/python scrape_smart_meter_texas.py &
 ```
 
+* Monitoring the script
+Starting up the script with the nohup command will run it detached from the console. To check if it's still running, you can run the command below. Progress can also be checked on the created log files.
+```
+    ps aux | grep meter_texas
+```
+
 ## Home assistant configuration
 Assuming the [MQTT integration](https://www.home-assistant.io/integrations/mqtt/) is configured, the sensor can be added to home assistant as a MQTT entity. Below is my configuration for reference.
 The "unit of measurement", "device_class" and "state_class" sensor attributes are required for Home Assistant to properly recognize the sensor in the [Energy Dashboard](https://www.home-assistant.io/docs/energy/).
