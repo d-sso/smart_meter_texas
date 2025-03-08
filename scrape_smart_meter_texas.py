@@ -61,14 +61,17 @@ class smt_handler:
             "ESIID": self.ESIID
             , "MeterNumber": self.MeterNumber
         }
-
-        self.logger.info('Issuing read request')
-        response = requests.post(config_variables.smart_meter_texas_on_demand_issue_read_api,data=json.dumps(request_data),headers=request_headers)
-        if response.ok:
-            self.logger.info('Request meter read suceeded')
-            return True
-        else:
-            self.logger.error(f"Request meter read failed - {response.text}")
+        try:
+            self.logger.info('Issuing read request')
+            response = requests.post(config_variables.smart_meter_texas_on_demand_issue_read_api,data=json.dumps(request_data),headers=request_headers)
+            if response.ok:
+                self.logger.info('Request meter read suceeded')
+                return True
+            else:
+                self.logger.error(f"Request meter read failed - {response.text}")
+                return False
+        except Exception as e:
+            self.logger.error(f"Issue requesting meter read - {e}")
             return False
     
     def collect_meter_read(self):
@@ -81,19 +84,23 @@ class smt_handler:
             "ESIID": self.ESIID
             , "MeterNumber": self.MeterNumber
         }
-        response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers)
-        if response.ok:
-            val = response.json()
-            while val['data']['odrstatus'] == "PENDING":
-                self.logger.info(f'Meter result not ready, retry in {config_variables.smart_meter_texas_sleep_after_read_request} seconds')
-                time.sleep(config_variables.smart_meter_texas_sleep_after_read_request)
-                response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers)
+        try:
+            response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers)
+            if response.ok:
                 val = response.json()
-            self.logger.info('Received meter read')
-            self.logger.info(val)
-            return val
-        else:
-            self.logger.error(f"Collect meter result failed - {response.text}")
+                while val['data']['odrstatus'] == "PENDING":
+                    self.logger.info(f'Meter result not ready, retry in {config_variables.smart_meter_texas_sleep_after_read_request} seconds')
+                    time.sleep(config_variables.smart_meter_texas_sleep_after_read_request)
+                    response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers)
+                    val = response.json()
+                self.logger.info('Received meter read')
+                self.logger.info(val)
+                return val
+            else:
+                self.logger.error(f"Collect meter result failed - {response.text}")
+                return False
+        except Exception as e:
+            self.logger.error(f"Issue retrieving meter read - {e}")
             return False
 
 
