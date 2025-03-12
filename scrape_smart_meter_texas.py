@@ -23,6 +23,7 @@ class smt_handler:
         self.logger = logger
         self.token = ""
         self.token_last_obtained = None
+        self.cookies = None
         pass
 
     def login(self, username:str, pwd:str):
@@ -37,15 +38,23 @@ class smt_handler:
 
             self.logger.debug('Logging in')
             wait = WebDriverWait(browser, config_variables.smart_meter_texas_sleep_timer_timeout_page_load)
+            browser.get_screenshot_as_file("BeforeLogin.png")
             wait.until(EC.element_to_be_clickable((By.ID, "userid"))).send_keys(username)
             wait.until(EC.element_to_be_clickable((By.ID, "password"))).send_keys(pwd)
+            browser.get_screenshot_as_file("AfterType.png")
             wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="loginform"]/div[8]/button'))).click()
 
             time.sleep(config_variables.smart_meter_texas_sleep_timer_after_login)
+            browser.get_screenshot_as_file("AfterLogin.png")
             self.logger.debug('Inside!')
             value = get_local_storage_item(browser, config_variables.smart_meter_texas_user_cookie)
             self.token = json.loads(value)['token']
+            self.logger.info(f"Received token - {self.token}")
             self.token_last_obtained = datetime.datetime.now()
+            cookies = browser.get_cookies()
+            self.cookies = {}
+            for cookie in cookies:
+                self.cookies[cookie['name']] = cookie['value']
         except Exception as e:
             self.logger.error("Issue logging in! Screenshot will be captured")
             if config_variables.smart_meter_texas_error_screenshot_file:
@@ -55,7 +64,7 @@ class smt_handler:
         request_headers = {
             "Content-Type" : "application/json",
             "Accept" : "application/json",
-            "Authorization" : f"Bearer {self.token}"
+            "Authorization" : f"Bearer {self.token}",
         }
         request_data = { 
             "ESIID": self.ESIID
@@ -63,7 +72,7 @@ class smt_handler:
         }
         try:
             self.logger.info('Issuing read request')
-            response = requests.post(config_variables.smart_meter_texas_on_demand_issue_read_api,data=json.dumps(request_data),headers=request_headers)
+            response = requests.post(config_variables.smart_meter_texas_on_demand_issue_read_api,data=json.dumps(request_data),headers=request_headers, timeout=30)
             if response.ok:
                 self.logger.info('Request meter read suceeded')
                 return True
@@ -85,7 +94,7 @@ class smt_handler:
             , "MeterNumber": self.MeterNumber
         }
         try:
-            response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers)
+            response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers, cookies=self.cookies, timeout=30)
             if response.ok:
                 val = response.json()
                 while val['data']['odrstatus'] == "PENDING":

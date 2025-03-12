@@ -2,3 +2,8 @@ login_information.py
 smart_meter_texas_scraping.log
 __pycache__/
 nohup.out
+scrape_smart_meter_texas.py
+AfterType.png
+AfterLogin.png
+BeforeLogin.png
+err.png
