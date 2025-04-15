@@ -20,11 +20,6 @@ The program currently tries to get the value once every hour, and I've noticed t
 
 ## Setting up
 * Clone/download the repository.
-* Create a virtual environment : https://docs.python.org/3/library/venv.html
-* Install dependencies:
-```
-    pip install -r requirements.txt
-``` 
 * Create a "login_information.py" file on the same directory, containing the top secret info to allow to connect. The required variables are below, set the strings to the appropriate information. 
 ```
 mqtt_username = 'mqtt_username'
@@ -43,18 +38,39 @@ meter_number = 'YOUR_NUMBER'
     * Frequency to (try) to update the meter reading is 1 hour, controlled by variable "smart_meter_texas_refresh_period" (in seconds). I'm not sure shorter periods will work, even with the 1 hour period sometimes I get errors.
     * The variable "smart_meter_texas_login_token_refresh_period" controls how often the program will login the main page. Two hours (7200 seconds) seems a standard time for login token expiration, might experiment with that at some point.
 
+### Running the script directly through python
+* Create a virtual environment : https://docs.python.org/3/library/venv.html
+* Install dependencies:
+```
+    pip install -r requirements.txt
+```
+* Run the script using the nohup (so it runs in the background):
+```
+    nohup ./.venv/bin/python scrape_smart_meter_texas.py &
+```
 
-## Running the script
-Run as python script ignoring the "SIGHUP" signal (running in background). In the future might be a good idea to run into a container, service, etc...
-Example assuming a virtual environment was created and you are calling it from the folder where the scripts are located:
+### Running the docker container
+
+A docker file is present, allowing the script to be run inside a container. The image can be built using:
 ```
-    nohup .venv/bin/python scrape_smart_meter_texas.py &
+    docker build -t smart_meter_texas .
 ```
 
-* Monitoring the script
-Starting up the script with the nohup command will run it detached from the console. To check if it's still running, you can run the command below. Progress can also be checked on the created log files.
+Due to the bot manager blocking access through the python requests library, it's necessary to add an entry to the hosts file so that the script work. The docker image can be run using the "--add-host" option to point the "www.smartmetertexas.com" address to the appropriate IP address (can be found for example by pinging smartmetertexas.com without the "www").
+Example of docker run command:
 ```
-    ps aux | grep meter_texas
+    docker run -d --add-host www.smartmetertexas.com=X.X.X.X smart_meter_texas
+```
+
+* Monitoring the container
+Starting up the script with the nohup command will run it detached from the console. To check if it's still running, you can run the command below. 
+```
+    docker ps | grep smart_meter_texas
+```
+
+Progress can also be checked on the created log files.
+```
+    docker logs smart_meter_texas
 ```
 
 ## Home assistant configuration

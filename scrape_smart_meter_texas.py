@@ -22,7 +22,7 @@ class smt_handler:
         self.MeterNumber = MeterNumber
         self.logger = logger
         self.token = ""
-        self.token_last_obtained = None
+        self.token_last_obtained = datetime.datetime(1970,1,1)
         self.cookies = None
         pass
 
@@ -119,12 +119,19 @@ class smt_handler:
 
 
 def main():
-    logging.basicConfig(
-        filename=config_variables.smart_meter_texas_log_file
-        ,level=logging.INFO
-        ,format='%(asctime)s %(message)s'
-        , datefmt='%d/%m/%Y %I:%M:%S %p'
-        )
+    if config_variables.smart_meter_texas_log_file:
+        logging.basicConfig(
+            filename=config_variables.smart_meter_texas_log_file
+            ,level=logging.INFO
+            ,format='%(asctime)s %(message)s'
+            , datefmt='%d/%m/%Y %I:%M:%S %p'
+            )
+    else:
+        logging.basicConfig(
+            level=logging.INFO
+            ,format='%(asctime)s %(message)s'
+            , datefmt='%d/%m/%Y %I:%M:%S %p'
+            )
 
     mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     mqttc.username_pw_set(config_variables.MQTT_info['username'],config_variables.MQTT_info['password'])
