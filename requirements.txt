@@ -1,3 +1,4 @@
 paho_mqtt
 requests
 selenium
+dnspython
