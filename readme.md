@@ -59,7 +59,7 @@ A docker file is present, allowing the script to be run inside a container. The 
 Due to the bot manager blocking access through the python requests library, it's necessary to add an entry to the hosts file so that the script work. The docker image can be run using the "--add-host" option to point the "www.smartmetertexas.com" address to the appropriate IP address (can be found for example by pinging smartmetertexas.com without the "www").
 Example of docker run command:
 ```
-    docker run -d --add-host www.smartmetertexas.com=X.X.X.X smart_meter_texas
+    docker run -d --add-host www.smartmetertexas.com=X.X.X.X --name="smart_meter_texas" -e TZ=America/Houston smart_meter_texas
 ```
 
 * Monitoring the container

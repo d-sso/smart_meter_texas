@@ -12,7 +12,8 @@ smart_meter_texas_pwd = login_information.smart_meter_texas_pwd
 eesid = login_information.eesid
 meter_number = login_information.meter_number
 
-smart_meter_texas_webpage = 'https://www.smartmetertexas.com'
+smart_meter_texas_domain = 'www.smartmetertexas.com'
+smart_meter_texas_webpage = f'https://{smart_meter_texas_domain}'
 smart_meter_texas_on_demand_issue_read_api = smart_meter_texas_webpage + "/api/ondemandread"
 smart_meter_texas_on_demand_get_read_api = smart_meter_texas_webpage + "/api/usage/latestodrread"
 

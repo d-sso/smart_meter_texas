@@ -14,4 +14,6 @@ COPY ./scrape_smart_meter_texas.py /code/scrape_smart_meter_texas.py
 COPY ./login_information.py /code/login_information.py
 COPY ./config_variables.py /code/config_variables.py
 
+ENV TZ=America/Chicago
+
 CMD ["python", "/code/scrape_smart_meter_texas.py"]
