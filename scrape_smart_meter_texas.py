@@ -114,8 +114,11 @@ class smt_handler:
                 val = response.json()
                 while val['data']['odrstatus'] == "PENDING":
                     self.logger.debug(f'Meter result not ready, retry in {config_variables.smart_meter_texas_sleep_after_read_request} seconds')
+                    self.logger.info(f'Message received: {val}')
                     time.sleep(config_variables.smart_meter_texas_sleep_after_read_request)
-                    response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers)
+                    smt_handler.request_dns()
+                    # wait for 1 min for response TODO: Transform into async call with timeout handling
+                    response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers,timeout=60)
                     val = response.json()
                 self.logger.debug('Received meter read')
                 self.logger.info(val)

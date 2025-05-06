@@ -26,4 +26,4 @@ smart_meter_texas_log_file = ''
 smart_meter_texas_sleep_between_cycles = 300
 smart_meter_texas_refresh_period = 3600
 smart_meter_texas_login_token_refresh_period = 7200
-smart_meter_texas_sleep_after_read_request = 10
+smart_meter_texas_sleep_after_read_request = 60
