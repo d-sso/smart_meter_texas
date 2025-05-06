@@ -1,0 +1,6 @@
+services:
+  smart_meter:
+    build: .
+    restart: unless-stopped
+    environment:
+      TZ: "America/Chicago"
