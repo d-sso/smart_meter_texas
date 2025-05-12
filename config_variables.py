@@ -14,8 +14,8 @@ meter_number = login_information.meter_number
 
 smart_meter_texas_domain = 'smartmetertexas.com'
 smart_meter_texas_webpage = f'https://www.{smart_meter_texas_domain}'
-smart_meter_texas_on_demand_issue_read_api = smart_meter_texas_webpage + "/api/ondemandread"
-smart_meter_texas_on_demand_get_read_api = smart_meter_texas_webpage + "/api/usage/latestodrread"
+smart_meter_texas_on_demand_issue_read_api = f'https://{smart_meter_texas_domain}/api/ondemandread'
+smart_meter_texas_on_demand_get_read_api = f'https://{smart_meter_texas_domain}/api/usage/latestodrread'
 
 smart_meter_texas_sleep_timer_after_login = 3
 smart_meter_texas_sleep_timer_timeout_page_load = 20

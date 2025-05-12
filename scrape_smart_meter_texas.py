@@ -87,7 +87,12 @@ class smt_handler:
         }
         try:
             self.logger.debug('Issuing read request')
-            response = requests.post(config_variables.smart_meter_texas_on_demand_issue_read_api,data=json.dumps(request_data),headers=request_headers, timeout=30)
+            response = requests.post(
+                config_variables.smart_meter_texas_on_demand_issue_read_api
+                ,data=json.dumps(request_data)
+                ,headers=request_headers
+                , timeout=30
+                , verify=False)
             if response.ok:
                 self.logger.info(f'Request meter read suceeded - {response.text}')
                 return True
@@ -109,14 +114,20 @@ class smt_handler:
             , "MeterNumber": self.MeterNumber
         }
         try:
-            response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers, cookies=self.cookies, timeout=30)
+            response = requests.post(
+                config_variables.smart_meter_texas_on_demand_get_read_api
+                ,data=json.dumps(request_data)
+                ,headers=request_headers
+                , cookies=self.cookies
+                , timeout=30
+                , verify=False)
             if response.ok:
                 val = response.json()
                 while val['data']['odrstatus'] == "PENDING":
                     self.logger.debug(f'Meter result not ready, retry in {config_variables.smart_meter_texas_sleep_after_read_request} seconds')
                     self.logger.info(f'Message received: {val}')
                     time.sleep(config_variables.smart_meter_texas_sleep_after_read_request)
-                    smt_handler.request_dns()
+                    #smt_handler.request_dns()
                     # wait for 1 min for response TODO: Transform into async call with timeout handling
                     response = requests.post(config_variables.smart_meter_texas_on_demand_get_read_api,data=json.dumps(request_data),headers=request_headers,timeout=60)
                     val = response.json()
@@ -163,21 +174,21 @@ def main():
         logger.debug(f"Waking up to process - now ts = {now_ts}, last_run = {last_run}, next refresh = {last_run + datetime.timedelta(0,config_variables.smart_meter_texas_refresh_period)}")
         if (now_ts-last_run).total_seconds() > config_variables.smart_meter_texas_refresh_period:
             last_run = now_ts
-            if smt_handler.request_dns():
-                if((now_ts-handler.token_last_obtained).total_seconds() > config_variables.smart_meter_texas_login_token_refresh_period):
-                    logger.info(f"Token is more than {config_variables.smart_meter_texas_login_token_refresh_period/3600} hours old, logging in again")
-                    handler.login(username=config_variables.smart_meter_texas_user,pwd=config_variables.smart_meter_texas_pwd)
-                if handler.request_meter_read():
-                    val = handler.collect_meter_read()
-                    if(val):
-                        meter_value = val
-                        msg_info = mqttc.publish(config_variables.MQTT_info['target_topic'],meter_value,qos=0)
-                        msg_info.wait_for_publish()
-                        logger.info(f"Finished processing - next refresh = {last_run + datetime.timedelta(0,config_variables.smart_meter_texas_refresh_period)}")
-                    else:
-                        logger.warning("Service returned bad data - not forwarded to MQTT")
+            #if smt_handler.request_dns():
+            if((now_ts-handler.token_last_obtained).total_seconds() > config_variables.smart_meter_texas_login_token_refresh_period):
+                logger.info(f"Token is more than {config_variables.smart_meter_texas_login_token_refresh_period/3600} hours old, logging in again")
+                handler.login(username=config_variables.smart_meter_texas_user,pwd=config_variables.smart_meter_texas_pwd)
+            if handler.request_meter_read():
+                val = handler.collect_meter_read()
+                if(val):
+                    meter_value = val
+                    msg_info = mqttc.publish(config_variables.MQTT_info['target_topic'],meter_value,qos=0)
+                    msg_info.wait_for_publish()
+                    logger.info(f"Finished processing - next refresh = {last_run + datetime.timedelta(0,config_variables.smart_meter_texas_refresh_period)}")
                 else:
-                    logger.warning("Error requesting read, will try again next hour")
+                    logger.warning("Service returned bad data - not forwarded to MQTT")
+            else:
+                logger.warning("Error requesting read, will try again next hour")
         
         logger.debug(f"Going to sleep for {config_variables.smart_meter_texas_sleep_between_cycles/60} min")
         time.sleep(config_variables.smart_meter_texas_sleep_between_cycles)
