@@ -48,6 +48,10 @@ meter_number = 'YOUR_NUMBER'
 ```
     nohup ./.venv/bin/python scrape_smart_meter_texas.py &
 ```
+* Check status - the nohup command will run the program in the background, to check if it's still running it's possible to use ps
+```
+    ps aux | grep smart_meter_texas
+```
 
 ### Running the docker container
 
@@ -63,12 +67,12 @@ Example of docker run command:
 ```
 
 * Monitoring the container
-Starting up the script with the nohup command will run it detached from the console. To check if it's still running, you can run the command below. 
+Starting up the script with the "-d" option will run it detached from the console. To check if it's still running, you can run the command below. 
 ```
     docker ps | grep smart_meter_texas
 ```
 
-Progress can also be checked on the created log files.
+Progress can also be checked on the log files.
 ```
     docker logs smart_meter_texas
 ```

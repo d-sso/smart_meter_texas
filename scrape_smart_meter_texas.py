@@ -92,7 +92,8 @@ class smt_handler:
                 ,data=json.dumps(request_data)
                 ,headers=request_headers
                 , timeout=30
-                , verify=False)
+                #, verify=False
+                )
             if response.ok:
                 self.logger.info(f'Request meter read suceeded - {response.text}')
                 return True
@@ -120,7 +121,8 @@ class smt_handler:
                 ,headers=request_headers
                 , cookies=self.cookies
                 , timeout=30
-                , verify=False)
+                #, verify=False
+                )
             if response.ok:
                 val = response.json()
                 while val['data']['odrstatus'] == "PENDING":
