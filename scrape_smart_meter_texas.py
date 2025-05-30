@@ -74,6 +74,12 @@ class smt_handler:
                 browser.get_screenshot_as_file(config_variables.smart_meter_texas_error_screenshot_file)
             else:
                 self.logger.error(f"Issue logging in! {e}")
+        finally:
+            try:
+                browser.quit()
+            except Exception as e:
+                self.logger.error(f"Error closing browser - {e}")
+            self.logger.debug('Browser closed')
     
     def request_meter_read(self):
         request_headers = {
