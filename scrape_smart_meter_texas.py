@@ -164,16 +164,17 @@ def main():
     handler = smt_handler(config_variables.eesid,config_variables.meter_number,logger)
     handler.login(username=config_variables.smart_meter_texas_user,pwd=config_variables.smart_meter_texas_pwd)
     last_run = datetime.datetime(2025,1,1)
+    last_ts = datetime.datetime(2025,1,1)
     while True:
         now_ts = datetime.datetime.now()
         now_hour = now_ts.hour
         logger.debug(f"Waking up to process - now ts = {now_ts}, last_run = {last_run}, next refresh = {last_run + datetime.timedelta(0,config_variables.smart_meter_texas_refresh_period)}")
         
         # When the day changes, update DNS entries
-        if (hasattr(config_variables,"api_key")) and (now_ts.day != last_run.day):
+        if (hasattr(config_variables,"api_key")) and (now_ts.day != last_ts.day):
             logger.info("Updating DNS entries")
             update_dns.sync_dns_record(config_variables.api_key, config_variables.unifi_gateway_address,logger)
-
+        last_ts = now_ts
         if (now_ts-last_run).total_seconds() > config_variables.smart_meter_texas_refresh_period:
             last_run = now_ts
             if((now_ts-handler.token_last_obtained).total_seconds() > config_variables.smart_meter_texas_login_token_refresh_period):

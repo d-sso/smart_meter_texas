@@ -1,6 +1,9 @@
 import requests
 import os
 import dns.resolver
+import urllib3
+
+urllib3.disable_warnings()
 
 def get_api_key():
     api_key_path = os.path.join(os.path.dirname(__file__), "api_key")
