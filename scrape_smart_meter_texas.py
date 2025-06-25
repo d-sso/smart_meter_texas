@@ -10,7 +10,7 @@ import logging
 import datetime
 import paho.mqtt.client as mqtt
 import config_variables
-import dns.resolver
+import update_dns
 
 logger = logging.getLogger(__name__)
 
@@ -26,18 +26,6 @@ class smt_handler:
         self.token_last_obtained = datetime.datetime(1970,1,1)
         self.cookies = None
         pass
-
-    def request_dns():
-        try:
-            # Use the DNS resolver to get the IP address of the domain
-            answers = dns.resolver.resolve(config_variables.smart_meter_texas_domain, 'A')
-            for rdata in answers:
-                ip_address = rdata.address
-                logger.info(f"Resolved IP address: {ip_address}")
-                return True
-        except Exception as e:
-            logger.error(f"DNS resolution failed: {e}")
-            return False
 
     def login(self, username:str, pwd:str):
         try:
@@ -180,9 +168,14 @@ def main():
         now_ts = datetime.datetime.now()
         now_hour = now_ts.hour
         logger.debug(f"Waking up to process - now ts = {now_ts}, last_run = {last_run}, next refresh = {last_run + datetime.timedelta(0,config_variables.smart_meter_texas_refresh_period)}")
+        
+        # When the day changes, update DNS entries
+        if (hasattr(config_variables,"api_key")) and (now_ts.day != last_run.day):
+            logger.info("Updating DNS entries")
+            update_dns.sync_dns_record(config_variables.api_key, config_variables.unifi_gateway_address,logger)
+
         if (now_ts-last_run).total_seconds() > config_variables.smart_meter_texas_refresh_period:
             last_run = now_ts
-            #if smt_handler.request_dns():
             if((now_ts-handler.token_last_obtained).total_seconds() > config_variables.smart_meter_texas_login_token_refresh_period):
                 logger.info(f"Token is more than {config_variables.smart_meter_texas_login_token_refresh_period/3600} hours old, logging in again")
                 handler.login(username=config_variables.smart_meter_texas_user,pwd=config_variables.smart_meter_texas_pwd)

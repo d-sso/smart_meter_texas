@@ -13,6 +13,7 @@ RUN apk add geckodriver
 COPY ./scrape_smart_meter_texas.py /code/scrape_smart_meter_texas.py
 COPY ./login_information.py /code/login_information.py
 COPY ./config_variables.py /code/config_variables.py
+COPY ./update_dns.py /code/update_dns.py
 
 ENV TZ=America/Chicago
 

@@ -11,6 +11,8 @@ smart_meter_texas_user = login_information.smart_meter_texas_user
 smart_meter_texas_pwd = login_information.smart_meter_texas_pwd
 eesid = login_information.eesid
 meter_number = login_information.meter_number
+api_key = login_information.api_key
+unifi_gateway_address = login_information.unifi_gateway_address
 
 smart_meter_texas_domain = 'smartmetertexas.com'
 smart_meter_texas_webpage = f'https://www.{smart_meter_texas_domain}'

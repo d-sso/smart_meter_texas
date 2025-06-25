@@ -11,6 +11,12 @@ Digging deeper, I found the python package ([this project](https://github.com/gr
 
 The problem is that the "official" API demands a SSL certificate and static IP so that they can enable access. As a hobbyist, I don't have time for that, so I looked up on how to programatically access webpage and issue commands. This simple script is the result of that, it uses [selenium](https://www.selenium.dev/) to create a browsing session using Firefox and log into Smart Meter Texas website to acquire a login token. In possesion of said token, it's possible to hit their APIs and request the meter readings.
 
+## Update 6/24/2025
+Apparently due to how the bot manager works, it's necessary to hit the server hosting the REST Web API directly. That server is registered under the DNS name "smartmetertexas.com" while the bot manager proxies are registered with "www.smartmetertexas.com".
+Therefore to make this work one could create a CNAME to make requests for "www.smartmetertexas.com" to resolve to the IP address registered for "smartmetertexas.com". I'm not a network or security expert, but from what I could grasp this is needed because of how SSL/HTTPS works.
+In my setup, I don't have a full fledged DNS server capable of handling CNAMES, so I went through the process of querying a DNS server (e.g. using the command "dig smartmetertexas.com") and then manually adding the resolved IP address into my own DNS server. This solved the problem for a while, however they do change their servers IP address from time to time.
+I finally took the time to experiment with "Vibe coding" and this resulted in a method to perform this DNS update on my Unify DNS server.
+
 ## Notes
 The program currently tries to get the value once every hour, and I've noticed that the APIs aren't that reliable when it comes to updating the meter value. As a result the value might come 1 hour (or more) late. It would be nice to add support to set the value timestamp on the MQTT message and on the Home Assistant sensor to correct for these inconsistencies on the API.
 
@@ -31,6 +37,10 @@ smart_meter_texas_pwd = 'smt_pwd'
 
 eesid = 'YOUR_SSID'
 meter_number = 'YOUR_NUMBER'
+
+# The following is used to update the DNS entries in a Unifi system
+api_key = 'UNIFI_API_KEY'
+unifi_gateway_address = 'https://ip_address_or_FQDN'
 ```
 
 * Take a look at the 'config_variables.py' script to check if you'd like to change any of the varaiables.
